@@ -1,11 +1,35 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Spring Security Example</title>
+    <meta charset="UTF-8">
+    <title>Show user</title>
 </head>
+
 <body>
-<h1>User, welcome spring boot security page!</h1>
+<div align="center">
+    <h2>User</h2>
+    <form th:method="GET" th:action="@{/user/{id}(id = ${user.getId()})}" th:object="${user}">
 
 
+    </form>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Password</th>
+            <th>Age</th>
+        </tr>
+        <th:block th:each="usr : ${user}">
+            <tr>
+                <td th:text="${user.getId()}"></td>
+                <td th:text="${user.getUsername()}"></td>
+                <td th:text="${user.getSurname()}"></td>
+                <td th:text="${user.getPassword()}"></td>
+                <td th:text="${user.getAge()}"></td>
+            </tr>
+        </th:block>
+    </table>
+</div>
 </body>
 </html>

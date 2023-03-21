@@ -1,18 +1,15 @@
 package ru.kata.spring.boot_security.demo.model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.springframework.security.core.GrantedAuthority;
-import java.util.Collection;
-
+import java.util.List;
 @Entity
 @Data
 @Table(name = "roles")
@@ -25,7 +22,9 @@ public class Role implements GrantedAuthority {
         this.id = id;
         this.name = name;
     }
-
+    public String toRoleStringAll() {
+        return name.contains("ROLE_ADMIN")?("ADMIN"):("USER");
+    }
     public Role() {
     }
     public Role(String name) {
@@ -36,6 +35,7 @@ public class Role implements GrantedAuthority {
         return getName();
     }
     @Transient
+    @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
     @ManyToMany(mappedBy = "roles")
-    private Collection<User> user;
+    private List<User> user;
 }

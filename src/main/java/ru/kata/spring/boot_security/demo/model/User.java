@@ -1,7 +1,5 @@
 package ru.kata.spring.boot_security.demo.model;
 
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,10 +11,13 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import java.util.ArrayList;
 import java.util.Collection;
-
+import java.util.List;
 @Entity
 @Data
 @Table(name = "users")
@@ -29,30 +30,40 @@ public class User implements UserDetails {
     private String name;
     @Column(name = "surname")
     private String surname;
+    @Column(name = "email")
+    private String email;
     @Column(name = "age")
     private int age;
     @Column(name = "", updatable = false)
     private String password;
+    public String toRoleString() {
+        List<String> arr = new ArrayList<>();
+        if (roles.toString().contains("ROLE_ADMIN")) {
+            arr.add("ADMIN");
+        }
+        if (roles.toString().contains("ROLE_USER")) {
+            arr.add("USER");
+        }
+        return arr.toString();
+    }
     @ManyToMany(fetch = FetchType.LAZY)
+    @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Collection < Role > roles;
+    private List < Role > roles;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getRoles();
     }
-
     @Override
     public String getPassword() {
         return password;
     }
-
     @Override
     public String getUsername() {
         return name;
     }
-
     @Override
     public boolean isAccountNonExpired() {
         return true;

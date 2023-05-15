@@ -17,23 +17,27 @@ import java.util.List;
 public class Role implements GrantedAuthority {
     @Id
     private Long id;
-    private String name;
-    public Role(Long id, String name) {
+    private String role;
+    public Role(Long id, String role) {
         this.id = id;
-        this.name = name;
-    }
-    public String toRoleStringAll() {
-        return name.contains("ROLE_ADMIN")?("ADMIN"):("USER");
+        this.role = role;
     }
     public Role() {
     }
-    public Role(String name) {
-        this.name = name;
+    public Role(String role) {
+        this.role = role;
     }
     @Override
     public String getAuthority() {
-        return getName();
+        return getRole();
     }
+    public String getRole() {
+        return role;
+    }
+    public String withoutPrefix() {
+        return role.substring(5);             // !!! добавил в начало getW... и начал видеть РОЛИ!!! метод для вывода в форме без ROLE_
+    }
+
     @Transient
     @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
     @ManyToMany(mappedBy = "roles")

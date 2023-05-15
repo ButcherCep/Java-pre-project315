@@ -18,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
 @Entity
 @Data
 @Table(name = "users")
@@ -26,7 +28,7 @@ public class User implements UserDetails {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "")
+    @Column(name = "username")
     private String name;
     @Column(name = "surname")
     private String surname;
@@ -36,22 +38,22 @@ public class User implements UserDetails {
     private int age;
     @Column(name = "", updatable = false)
     private String password;
-    public String toRoleString() {
-        List<String> arr = new ArrayList<>();
-        if (roles.toString().contains("ROLE_ADMIN")) {
-            arr.add("ADMIN");
-        }
-        if (roles.toString().contains("ROLE_USER")) {
-            arr.add("USER");
-        }
-        return arr.toString();
-    }
+//    public String toRoleString() {
+//        List<String> arr = new ArrayList<>();
+//        if (roles.toString().contains("ROLE_ADMIN")) {
+//            arr.add("ADMIN");
+//        }
+//        if (roles.toString().contains("ROLE_USER")) {
+//            arr.add("USER");
+//        }
+//        return arr.toString();
+//    }
     @ManyToMany(fetch = FetchType.LAZY)
     @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private List < Role > roles;
+    private Set< Role > roles;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getRoles();

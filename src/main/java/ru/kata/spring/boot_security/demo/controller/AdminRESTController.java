@@ -1,8 +1,10 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import java.security.Principal;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,9 +18,10 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 import java.util.List;
+import java.util.Set;
 
 @RestController
-@RequestMapping("/api")
+//@RequestMapping("/api")
 public class AdminRESTController {
     private final UserService userService;
     private final RoleService roleService;
@@ -28,34 +31,48 @@ public class AdminRESTController {
         this.roleService = roleService;
     }
 
-    @GetMapping("/adminpanel/allUsers")
+    @GetMapping("/allUsers")
     public ResponseEntity<List<User>> getAllUsers() {
         return new ResponseEntity<>(userService.showAllUsers(), HttpStatus.OK);
     }
-    @GetMapping("/adminpanel/allRoles")
+
+    @GetMapping("/allRoles")
     public ResponseEntity<List<Role>> getRole() {
         return new ResponseEntity<>(roleService.getAllRoles(), HttpStatus.OK);
     }
-    @GetMapping("/adminpanel/principle")
-    public ResponseEntity<User> getPrincipal (Principal principal) {
+
+    @GetMapping("/myPrincipal")
+    public ResponseEntity<User> getPrincipal(Principal principal) {
         return new ResponseEntity<>(userService.findByUsername(principal.getName()),
                 HttpStatus.OK);
     }
 
-    @PostMapping("/adminpanel/new")
-    public ResponseEntity<User> creatUser (@RequestBody User userNew,
-                                           @RequestParam(value = "checkedRoles") List<String> selectResult) {
-        userService.saveUser(userNew,selectResult);
-        return new ResponseEntity<>(userNew, HttpStatus.OK);
+    @GetMapping("/oneUser/{id}")
+    public ResponseEntity<User> getUser(@PathVariable("id") Long id) {
+        try {
+            return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
-    @PostMapping("/adminpanel/updateUser/{id}")
-    public ResponseEntity<User> updateUser(@RequestBody User userUp,
-                                           @PathVariable("id") Long id,
-                                           @RequestParam(value = "Selector") List<String> selectResult) {
-        userService.updateUser(id, userUp, selectResult);
+    @PostMapping("/makeUser")
+    public ResponseEntity<User> creatRestUser(@RequestBody User user) {
+        List<String> list1 = user.getRoles().stream().map(role -> role.getRole()).collect(Collectors.toList());
+        List<Role> list2 = roleService.listByRole(list1);
+        user.setRoles(Set.copyOf(list2));
+        userService.add(user);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PostMapping("/changeUser/{id}")
+    public ResponseEntity<User> updateUser(@RequestBody User userUp, @PathVariable Long id) {
+        List<String> list1 = userUp.getRoles().stream().map(role->role.getRole()).collect(Collectors.toList());
+        List<Role> list2 = roleService.listByRole(list1);
+        userUp.setRoles(Set.copyOf(list2));
+        userService.edit(id, userUp);
         return new ResponseEntity<>(userUp, HttpStatus.OK);
     }
-    @DeleteMapping("/adminpanel/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<User> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.OK);
